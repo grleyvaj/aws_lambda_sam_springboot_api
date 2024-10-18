@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Spring Boot 2 API - org.example::spring-boot-lambda
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+
+Resources:
+  SpringBootLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: financial-institution-lambda
+      Handler: mx.example.api_aws.StreamLambdaHandler::handleRequest
+      Runtime: java17
+      CodeUri: .
+      MemorySize: 512
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - apigateway:POST
+                - apigateway:GET
+              Resource: "*"
+      Timeout: 30
+      Events:
+        FinancialsApiGetAll:
+          Type: Api
+          Properties:
+            Path: /api/v1/financials
+            Method: get
+            RestApiId: !Ref MyApiGateway
+        FinancialsApiGet:
+          Type: Api
+          Properties:
+            Path: /api/v1/financials/{id}
+            Method: get
+            RestApiId: !Ref MyApiGateway
+        FinancialsApiPost:
+          Type: Api
+          Properties:
+            Path: /api/v1/financials
+            Method: post
+            RestApiId: !Ref MyApiGateway
+        PingApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/ping
+            Method: get
+            RestApiId: !Ref MyApiGateway
+  MyApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: financial-institution-api
+      StageName: dev
+
+Outputs:
+  MyApiGatewayFinancialsAllUrl:
+    Description: URL for Financials endpoint (all)
+    Value: !Sub 'https://${MyApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/api/v1/financials'
+    Export:
+      Name: MyApiGatewayFinancialsAllUrl
+  MyApiGatewayFinancialsByIdUrl:
+    Description: URL for Financials endpoint (by ID)
+    Value: !Sub 'https://${MyApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/api/v1/financials/{id}'
+    Export:
+      Name: MyApiGatewayFinancialsByIdUrl
+  MyApiGatewayPingUrl:
+    Description: URL for Ping endpoint
+    Value: !Sub 'https://${MyApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/api/v1/ping'
+    Export:
+      Name: MyApiGatewayPingUrl
