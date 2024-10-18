@@ -56,12 +56,10 @@ public class FinancialInstitutionApiController {
     }
 
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<FinancialInstitutionDetailListResponse> getAll(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<FinancialInstitutionDetailListResponse> getAll() {
         FinancialInstitutionDetailResponse financialInstitutionDetailResponse = this.financialInstitutionGetUseCase.execute(2L).map(
                 this.financialInstitutionDetailResponseMapper::map
-        ).orElseThrow(() -> new FinancialInstitutionNotFoundException(id));
+        ).orElseThrow(() -> new FinancialInstitutionNotFoundException(2L));
 
         return ResponseEntity.ok(new FinancialInstitutionDetailListResponse(
                 Collections.singletonList(financialInstitutionDetailResponse)
